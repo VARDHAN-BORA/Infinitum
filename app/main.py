@@ -31,6 +31,7 @@ async def query(payload: QueryRequest):
         match_count=len(result.matches),
         matches=result.matches,
         latency_ms=result.latency_ms,
+        cache_hit=result.cache_hit,
     )
 
 

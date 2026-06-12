@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass
 from functools import partial
@@ -105,7 +106,7 @@ def _demo_fallback(query_text: str) -> "PipelineResult":
         return PipelineResult(
             answer=entry["answer"],
             matches=matches,
-            latency_ms=_FALLBACK_LATENCY,
+            latency_ms=_FALLBACK_LATENCY.copy(),
             cache_hit=False,
         )
 
@@ -113,7 +114,7 @@ def _demo_fallback(query_text: str) -> "PipelineResult":
     return PipelineResult(
         answer=_FALLBACK_DEFAULT_ANSWER,
         matches=[],
-        latency_ms=_FALLBACK_LATENCY,
+        latency_ms=_FALLBACK_LATENCY.copy(),
         cache_hit=False,
     )
 
@@ -197,8 +198,11 @@ async def run_rag_pipeline(
         clean_query = query_text.strip().lower()
 
         # ── 0a. Greeting bypass ───────────────────────────────────────────────
-        # Exact single-token greetings skip Redis and Pinecone entirely.
-        if clean_query in _GREETING_TOKENS:
+        # Strip trailing/leading punctuation before checking so "hi!", "hello?"
+        # and "Hey." all resolve correctly. "hi there" still passes through
+        # because after stripping it is still two words, not one token.
+        _clean_greeting = re.sub(r"[^a-z0-9\s]", "", clean_query).strip()
+        if _clean_greeting in _GREETING_TOKENS:
             logger.info("Greeting bypass triggered for %r", clean_query)
             return PipelineResult(
                 answer=(
@@ -207,14 +211,17 @@ async def run_rag_pipeline(
                     "test live RAG retrievals and our ~2ms caching architecture!"
                 ),
                 matches=[],
-                latency_ms=_ZERO_MS,
+                latency_ms=_ZERO_MS.copy(),
                 cache_hit=False,
             )
 
         # ── 0b. Date / time bypass ────────────────────────────────────────────
-        # Any query containing 'date', 'time', or 'today' returns the live
-        # system date without touching any external infrastructure.
-        if any(token in clean_query for token in _DATE_TOKENS):
+        # Triggered only when a DATE_TOKEN appears as a whole word.
+        # Using re.findall word-boundary extraction prevents substring false
+        # positives: "updates" contains "date" but the extracted word is
+        # "updates", which is NOT in _DATE_TOKENS.
+        _query_words = set(re.findall(r"\b\w+\b", clean_query))
+        if _DATE_TOKENS & _query_words:
             today_str = datetime.date.today().strftime("%A, %B %d, %Y")
             logger.info("Date bypass triggered — returning %s", today_str)
             return PipelineResult(
@@ -223,7 +230,7 @@ async def run_rag_pipeline(
                     "All telemetry lines and memory-cached pipelines are operating normally."
                 ),
                 matches=[],
-                latency_ms=_ZERO_MS,
+                latency_ms=_ZERO_MS.copy(),
                 cache_hit=False,
             )
 

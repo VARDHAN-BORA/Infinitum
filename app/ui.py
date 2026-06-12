@@ -60,6 +60,10 @@ st.markdown(
             background: #dbeafe; color: #1d4ed8;
             border: 1.5px solid #93c5fd;
         }
+        .badge-intent {
+            background: #fef9c3; color: #854d0e;
+            border: 1.5px solid #fde047;
+        }
 
         /* ---- metric cards ---- */
         .metric-row { display: flex; gap: 8px; margin-bottom: 0.8rem; }
@@ -163,15 +167,26 @@ def _query_api(query: str, top_k: int) -> dict | None:
 
 
 def _render_telemetry(latency: dict[str, float], cache_hit: bool) -> None:
-    """Render the developer telemetry panel in the sidebar."""
-    is_cache = cache_hit or (
-        latency.get("retrieval_ms", 1) == 0.0
-        and latency.get("generation_ms", 1) == 0.0
-    )
+    """
+    Render the developer telemetry panel in the sidebar.
 
-    if is_cache:
+    Three distinct states:
+      cache_hit=True           → green  CACHE HIT (REDIS)
+      cache_hit=False, 0ms     → yellow INTENT ROUTER BYPASS
+      cache_hit=False, non-0ms → blue   LIVE PIPELINE GENERATION
+    """
+    retrieval = latency.get("retrieval_ms", 0.0)
+    generation = latency.get("generation_ms", 0.0)
+    is_zero_latency = (retrieval == 0.0 and generation == 0.0)
+
+    if cache_hit:
         st.sidebar.markdown(
             '<div class="badge badge-cache">⚡ Cache Hit (Redis)</div>',
+            unsafe_allow_html=True,
+        )
+    elif is_zero_latency:
+        st.sidebar.markdown(
+            '<div class="badge badge-intent">⚡ Intent Router Bypass (0ms)</div>',
             unsafe_allow_html=True,
         )
     else:
@@ -242,8 +257,8 @@ with st.sidebar:
         if st.session_state.last_telemetry:
             data = st.session_state.last_telemetry
             _render_telemetry(
-                data.get("latency_ms", {}),
-                data.get("cache_hit", False),
+                latency=data.get("latency_ms", {}),
+                cache_hit=data.get("cache_hit", False),
             )
             match_count = data.get("match_count", 0)
             st.caption(f"Context chunks used: **{match_count}**")
