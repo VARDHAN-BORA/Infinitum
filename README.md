@@ -123,6 +123,68 @@ stores answers by SHA-256 query hash with a 1-hour TTL.
 
 ---
 
+## 📚 What Kind of RAG Is This? (The Knowledge Base Explained)
+
+> **Short answer:** This is a simulated **enterprise internal knowledge base** — the kind of private company documentation that employees need to search, but which can never be sent to a public AI. Infinitum lets you ask natural language questions against your own private documents, securely and locally.
+
+This is exactly the real-world use case for RAG: proprietary internal docs that can't go into ChatGPT.
+
+The system has **3 indexed documents** representing a fictional company's internal runbooks:
+
+---
+
+### 📋 Document 1 — `compliance_manual.txt` (Infrastructure Compliance)
+**What it covers:** 2026 internal engineering mandates — API routing rules, telemetry logging requirements, and Redis cache targets.
+
+**Ask questions like:**
+```
+What are the logging requirements for microservices?
+How often are logs shipped to the security monitor?
+What is the Redis cache hit target?
+What is the rule for synchronous vs asynchronous workers?
+What are the 2026 updates for routing and logging protocols?
+```
+
+---
+
+### 🗄️ Document 2 — `database_policy.txt` (Vector Storage Policy)
+**What it covers:** Pinecone/vector database configuration — index dimensions, connection pooling rules, and socket protection.
+
+**Ask questions like:**
+```
+What vector dimensions should we use for text embeddings?
+What is the maximum idle timeout for database connections?
+How should engineering teams scale vector namespaces?
+What protects the Pinecone clusters from socket depletion?
+```
+
+---
+
+### 🚀 Document 3 — `deployment_guide.txt` (CI/CD Runbook)
+**What it covers:** Continuous deployment rules — test coverage requirements, container health checks, and telemetry tracing.
+
+**Ask questions like:**
+```
+What test coverage percentage is required before deployment?
+What must pass before code goes to the live cluster?
+What do telemetry spans track?
+What are the staging environment requirements?
+```
+
+---
+
+### 💬 Conversational Queries (No Documents Needed)
+
+The system also handles these instantly via the Intent Router — no Pinecone or Groq call made:
+
+| Query type | Example | Response time |
+|---|---|---|
+| Greetings | `hi`, `hello!`, `hey` | 0 ms |
+| Date / Time | `what's today's date?` | 0 ms |
+| Knowledge base overview | `what data do you have?` | ~1,058 ms (live RAG) |
+
+---
+
 ## 🚀 Quick Start Interactive Tour
 
 ### 1. Setup
