@@ -56,35 +56,35 @@ stores answers by SHA-256 query hash with a 1-hour TTL.
 ║   User Query (POST /v1/query)                                    ║
 ║         │                                                        ║
 ║         ▼                                                        ║
-║   ┌─────────────────────────────────────────┐                   ║
-║   │         INTENT ROUTER (0 ms)            │                   ║
-║   │  Greeting? → Instant warm response      │                   ║
-║   │  Date/Time? → Live datetime() response  │                   ║
-║   └─────────────────┬───────────────────────┘                   ║
+║   ┌─────────────────────────────────────────┐                    ║
+║   │         INTENT ROUTER (0 ms)            │                    ║
+║   │  Greeting? → Instant warm response      │                    ║
+║   │  Date/Time? → Live datetime() response  │                    ║
+║   └─────────────────┬───────────────────────┘                    ║
 ║                     │ (technical queries only)                   ║
 ║                     ▼                                            ║
-║   ┌─────────────────────────────────────────┐                   ║
-║   │       REDIS SEMANTIC CACHE (~2 ms)      │                   ║
-║   │  Key: SHA-256(query.strip().lower())    │                   ║
-║   │  TTL: 3600s  │  HIT → return instantly  │                   ║
-║   └─────────────────┬───────────────────────┘                   ║
+║   ┌─────────────────────────────────────────┐                    ║
+║   │       REDIS SEMANTIC CACHE (~2 ms)      │                    ║
+║   │  Key: SHA-256(query.strip().lower())    │                    ║
+║   │  TTL: 3600s  │  HIT → return instantly  │                    ║
+║   └─────────────────┬───────────────────────┘                    ║
 ║                     │ CACHE MISS                                 ║
 ║                     ▼                                            ║
-║   ┌─────────────────────────────────────────┐                   ║
-║   │    PINECONE VECTOR RETRIEVAL (~280 ms)  │                   ║
-║   │  index.search_records()                 │                   ║
-║   │  llama-text-embed-v2 (integrated embed) │                   ║
-║   │  Returns top-k semantically ranked hits │                   ║
-║   └─────────────────┬───────────────────────┘                   ║
+║   ┌─────────────────────────────────────────┐                    ║
+║   │    PINECONE VECTOR RETRIEVAL (~280 ms)  │                    ║
+║   │  index.search_records()                 │                    ║
+║   │  llama-text-embed-v2 (integrated embed) │                    ║
+║   │  Returns top-k semantically ranked hits │                    ║
+║   └─────────────────┬───────────────────────┘                    ║
 ║                     ▼                                            ║
-║   ┌─────────────────────────────────────────┐                   ║
-║   │    GROQ LLM GENERATION (~780 ms)        │                   ║
-║   │  llama-3.1-8b-instant (free tier)       │                   ║
-║   │  3-mode system prompt:                  │                   ║
-║   │  • Greetings & Casual Chat              │                   ║
-║   │  • System Data Overview                 │                   ║
-║   │  • Technical Research                   │                   ║
-║   └─────────────────┬───────────────────────┘                   ║
+║   ┌─────────────────────────────────────────┐                    ║
+║   │    GROQ LLM GENERATION (~780 ms)        │                    ║
+║   │  llama-3.1-8b-instant (free tier)       │                    ║
+║   │  3-mode system prompt:                  │                    ║
+║   │  • Greetings & Casual Chat              │                    ║
+║   │  • System Data Overview                 │                    ║
+║   │  • Technical Research                   │                    ║
+║   └─────────────────┬───────────────────────┘                    ║
 ║                     ▼                                            ║
 ║   Redis WRITE (answer cached for 1 hr)                           ║
 ║         │                                                        ║
