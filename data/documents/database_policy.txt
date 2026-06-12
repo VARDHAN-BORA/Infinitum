@@ -1,0 +1,5 @@
+REAL WORLD CORPORATE INTELLIGENCE FEED
+Document Reference Identifier: REF-1002
+
+INFINITUM AI VECTOR CORE STORAGE AND INDEXING POLICY
+This document dictates the storage parameters for our high-density embedding indexes deployed on cloud vector instances. All engineering teams pushing vector models must scale their namespaces to match our dimension rules (e.g., 1536 for text-embedding-3 or 1024 for advanced multi-lingual setups). Database connections must employ connection pooling with a maximum idle timeout of 300 seconds to protect our Pinecone clusters from horizontal socket depletion.
