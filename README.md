@@ -1,12 +1,10 @@
 # ∞ Infinitum AI — Enterprise RAG Platform
 
-> **[🚀 Launch Live App Interactive Demo](https://infinitum-1.onrender.com/)**
+> **[🚀 Launch Live App Interactive Demo](https://infinitum-1.onrender.com)**
 
 A production-grade **Retrieval-Augmented Generation (RAG)** platform built from scratch,
 featuring semantic vector search, Redis semantic caching, multi-tier intent routing,
 and a polished Streamlit frontend with live developer telemetry.
-
-
 
 ---
 
@@ -14,7 +12,7 @@ and a polished Streamlit frontend with live developer telemetry.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                   LATENCY BENCHMARK RESULTS (Live / Render)         │
+│                   LATENCY BENCHMARK RESULTS                         │
 ├─────────────────────────┬───────────────────────────────────────────┤
 │  Live Pipeline (first)  │  ~1,905 ms  (Pinecone + Groq LLM)         │
 │  Redis Cache Hit        │    ~446 ms  (SHA-256 key lookup)          │
@@ -25,7 +23,6 @@ and a polished Streamlit frontend with live developer telemetry.
 
 > **Note:** Benchmarks measured on Render free tier (0.1 CPU, shared infrastructure).
 > Local benchmarks show **99.8% latency reduction** (1,058ms → 2ms) with dedicated Redis.
-> Cache hit reduction on live deployment: **76.6%** (1,905ms → 446ms).
 
 After the first query, identical questions are served from Redis cache — skipping
 Pinecone retrieval and Groq generation entirely.
@@ -126,7 +123,7 @@ Pinecone retrieval and Groq generation entirely.
 | **Frontend UI** | Streamlit 1.41 — chat interface + live developer telemetry |
 | **Evaluation** | Custom heuristic RAGAS harness (faithfulness + relevance) |
 | **Config** | `.env` via Pydantic Settings — zero hardcoded secrets |
-| **Deployment** | Render (backend + frontend) + Upstash Redis (cache) |
+| **Deployment** | Render + Upstash Redis |
 
 ---
 
@@ -201,7 +198,7 @@ Copy `.env.example` to `.env` and fill in your keys:
 PINECONE_API_KEY=your_key_here
 PINECONE_INDEX_NAME=llama-text-embed-v2-index
 GROQ_API_KEY=your_key_here
-REDIS_HOST=localhost      # optional — app degrades gracefully without Redis
+REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=           # required for Upstash in production
 ```
@@ -244,46 +241,13 @@ infinitum/
 
 ---
 
-## 🔌 API Reference
-
-### `POST /v1/query`
-```json
-{
-  "query": "What are the 2026 routing protocol updates?",
-  "top_k": 5
-}
-```
-**Response:**
-```json
-{
-  "answer": "The 2026 updates introduce...",
-  "match_count": 3,
-  "matches": [{ "id": "...", "score": 0.9823, "text": "...", "source": "compliance_manual.txt" }],
-  "latency_ms": { "retrieval_ms": 986.0, "generation_ms": 390.0, "total_ms": 1905.0 }
-}
-```
-
-### `POST /v1/ingest`
-```json
-{ "content": "Your document text...", "source": "compliance_manual.txt" }
-```
-
-### `GET /health`
-```json
-{ "status": "ok", "service": "infinitum" }
-```
-
-Interactive docs: **https://infinitum-du39.onrender.com/docs**
-
----
-
 ## 🌐 Deployment
 
-| Service | Platform | URL |
-|---|---|---|
-| **FastAPI Backend** | Render (Free) | 
-| **Streamlit Frontend** | Render (Free) | 
-| **Redis Cache** | Upstash (Free) | 
+| Service | Platform |
+|---|---|
+| **FastAPI Backend** | Render (Free) |
+| **Streamlit Frontend** | Render (Free) |
+| **Redis Cache** | Upstash (Free) — TLS/SSL enabled |
 
 > ⚠️ Free tier instances spin down after 15 min of inactivity. First request may take 30–60s to wake up.
 
