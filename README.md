@@ -6,7 +6,7 @@ A production-grade **Retrieval-Augmented Generation (RAG)** platform built from 
 featuring semantic vector search, Redis semantic caching, multi-tier intent routing,
 and a polished Streamlit frontend with live developer telemetry.
 
-**Live API:** https://infinitum-du39.onrender.com/docs
+
 
 ---
 
