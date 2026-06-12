@@ -281,9 +281,9 @@ Interactive docs: **https://infinitum-du39.onrender.com/docs**
 
 | Service | Platform | URL |
 |---|---|---|
-| **FastAPI Backend** | Render (Free) | https://infinitum-du39.onrender.com |
-| **Streamlit Frontend** | Render (Free) | https://infinitum-1.onrender.com |
-| **Redis Cache** | Upstash (Free) | Managed — TLS/SSL enabled |
+| **FastAPI Backend** | Render (Free) | 
+| **Streamlit Frontend** | Render (Free) | 
+| **Redis Cache** | Upstash (Free) | 
 
 > ⚠️ Free tier instances spin down after 15 min of inactivity. First request may take 30–60s to wake up.
 
