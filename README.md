@@ -152,7 +152,7 @@ Open **`http://localhost:8501`**
 
 ---
 
-### 3. Recruiter Verification Tour
+### 3. Scenarios you can test!
 
 Click through these four scenarios in the Streamlit UI to see every system layer fire:
 
