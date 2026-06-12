@@ -14,9 +14,9 @@ and a polished Streamlit frontend with live developer telemetry.
 ┌─────────────────────────────────────────────────────────────────────┐
 │                   LATENCY BENCHMARK RESULTS                         │
 ├─────────────────────────┬───────────────────────────────────────────┤
-│  Live Pipeline (first)  │  ~1,058 ms  (Pinecone + Groq LLM)        │
+│  Live Pipeline (first)  │  ~1,058 ms  (Pinecone + Groq LLM)         │
 │  Redis Cache Hit        │    ~2 ms    (SHA-256 key lookup)          │
-│  Latency Reduction      │   99.8%  ██████████████████████████████  │
+│  Latency Reduction      │   99.8%  ██████████████████████████████   │
 │  Intent Bypass          │    ~0 ms    (greetings / date queries)    │
 └─────────────────────────┴───────────────────────────────────────────┘
 ```
