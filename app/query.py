@@ -145,8 +145,10 @@ async def _get_redis() -> aioredis.Redis | None:
         client = aioredis.Redis(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
+            password=settings.REDIS_PASSWORD or None,
             decode_responses=True,
-            socket_connect_timeout=1,
+            socket_connect_timeout=2,
+            ssl=True,
         )
         await client.ping()
         return client
