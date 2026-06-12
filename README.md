@@ -29,7 +29,7 @@ Pinecone retrieval and Groq generation entirely.
 
 ---
 
-<img width="1389" height="756" alt="Greetings" src="https://github.com/user-attachments/assets/a40bcc19-c046-4451-bcbf-973947d842dc" />
+
 <img width="1443" height="785" alt="Query" src="https://github.com/user-attachments/assets/440644f8-a324-4957-90b1-b7021f138e7c" />
 <img width="1433" height="778" alt="Cache Hit" src="https://github.com/user-attachments/assets/42abc41d-699a-440b-8b7e-55b938f4cdd2" />
 
@@ -181,6 +181,7 @@ What do telemetry spans track?
 | Knowledge base overview | `what data do you have?` | ~1,905 ms (live RAG) |
 
 ---
+<img width="1389" height="756" alt="Greetings" src="https://github.com/user-attachments/assets/a40bcc19-c046-4451-bcbf-973947d842dc" />
 
 ## 🚀 Quick Start
 
