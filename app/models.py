@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import datetime
 import uuid
@@ -68,6 +68,13 @@ class QueryRequest(BaseModel):
         description="Maximum number of matching chunks to return.",
     )
 
+    @field_validator("query")
+    @classmethod
+    def query_must_not_be_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("query must not be blank or whitespace only")
+        return v
+
 
 class QueryMatch(BaseModel):
     """A single retrieved chunk returned from Pinecone."""
@@ -89,5 +96,9 @@ class QueryResponse(BaseModel):
     matches: list[QueryMatch]
     latency_ms: dict[str, float] = Field(
         description="Breakdown: retrieval_ms, generation_ms, total_ms. "
-                    "All zero on a cache hit."
+                    "All zero on a cache hit or intent bypass."
+    )
+    cache_hit: bool = Field(
+        default=False,
+        description="True only when the answer was served from Redis cache."
     )
