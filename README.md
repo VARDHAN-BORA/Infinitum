@@ -27,6 +27,11 @@ stores answers by SHA-256 query hash with a 1-hour TTL.
 
 ---
 
+<img width="1389" height="756" alt="Greetings" src="https://github.com/user-attachments/assets/a40bcc19-c046-4451-bcbf-973947d842dc" />
+<img width="1443" height="785" alt="Query" src="https://github.com/user-attachments/assets/440644f8-a324-4957-90b1-b7021f138e7c" />
+<img width="1433" height="778" alt="Cache Hit" src="https://github.com/user-attachments/assets/42abc41d-699a-440b-8b7e-55b938f4cdd2" />
+
+
 ## 🏗️ System Architecture
 
 ```
@@ -258,3 +263,115 @@ The app is deployment-ready for any Python-compatible cloud platform:
 | **Docker** | `docker build -t infinitum . && docker run -p 8000:8000 infinitum` |
 
 Update the demo badge URL at the top of this README after deploying.
+
+---
+
+## 🔬 Edge Case Audit & Failure Handling
+
+This project was put through a systematic edge-case audit. **6 bugs were found and fixed.** Here is every failure mode and the exact engineering decision used to resolve it.
+
+---
+
+### Bug 1 — Date Bypass: Substring False Positive *(Critical)*
+
+**Failure:** Any query containing the word `"updates"` was intercepted by the date bypass and returned *"Today's system timestamp is…"* instead of running the RAG pipeline. Root cause: `"updates"` contains `"date"` as a substring.
+
+```
+"give me a summary of the 2026 infrastructure compliance updates."
+                                                          ^^^^^^
+                                                    contains "date"
+```
+
+**Affected queries:** Every demo query (`"what are the 2026 updates…"`, `"give me a summary…"`), plus any real-world query about `"validate"`, `"mandate"`, `"updated"`, `"timestamp"`.
+
+**Fix:** Replaced substring `in` check with `re.findall(r"\b\w+\b", query)` whole-word extraction + set intersection. `"updates"` extracts as the token `"updates"` — not in `{"date","time","today"}`.
+
+```python
+# Before (broken)
+if any(token in clean_query for token in _DATE_TOKENS):
+
+# After (fixed)
+_query_words = set(re.findall(r"\b\w+\b", clean_query))
+if _DATE_TOKENS & _query_words:
+```
+
+---
+
+### Bug 2 — Greeting Bypass: Punctuation Not Stripped *(High)*
+
+**Failure:** `"hi!"`, `"hello?"`, `"Hey."` all fell through to the full Pinecone + Groq pipeline instead of the 0ms greeting bypass. The frozenset check was exact — `"hi!"` ≠ `"hi"`.
+
+**Fix:** Strip all non-alphanumeric characters before the frozenset check using `re.sub(r"[^a-z0-9\s]", "", clean_query).strip()`.
+
+```python
+_clean_greeting = re.sub(r"[^a-z0-9\s]", "", clean_query).strip()
+if _clean_greeting in _GREETING_TOKENS:
+```
+
+`"hi there"` correctly still passes through (two words after strip, not in frozenset).
+
+---
+
+### Bug 3 — Evaluator: False Drift Warning on Stop-Word Answers *(Medium)*
+
+**Failure:** An answer consisting of mostly common words (e.g., *"Sure, I can help with that."*) has zero meaningful tokens after stop-word removal. `compute_faithfulness` returned `0.0`, firing a `⚠️ RETRIEVAL DRIFT DETECTED` warning even though the response was valid.
+
+**Fix:** Return a neutral `0.5` (no-opinion score) instead of `0.0` when `answer_words` is empty after stop-word filtering. `0.5` sits above the `0.7` warning threshold only when combined with a healthy `answer_relevance`, so genuine drift is still caught.
+
+---
+
+### Bug 4 — Mutable Shared Dict Returned by Reference *(Medium)*
+
+**Failure:** `_ZERO_MS` and `_FALLBACK_LATENCY` were module-level dicts returned directly into `PipelineResult.latency_ms`. Any downstream code mutating `result.latency_ms` would silently corrupt the shared constant, causing all future responses to return wrong telemetry values.
+
+**Fix:** All four return sites now call `.copy()`:
+
+```python
+latency_ms=_ZERO_MS.copy()
+latency_ms=_FALLBACK_LATENCY.copy()
+```
+
+---
+
+### Bug 5 — Whitespace-Only Query Bypasses Validation *(Medium)*
+
+**Failure:** A `query` of `"   "` (spaces only) passes Pydantic's `min_length=1` check (length = 3), but after `.strip()` in the pipeline it becomes `""` — an empty string fed to Pinecone's semantic search, producing undefined behaviour.
+
+**Fix:** Added a Pydantic `@field_validator` on `QueryRequest.query` that strips whitespace and raises a `ValueError` if the result is empty. Returns HTTP 422 with a clear message.
+
+```python
+@field_validator("query")
+@classmethod
+def query_must_not_be_blank(cls, v: str) -> str:
+    if not v.strip():
+        raise ValueError("query must not be blank or whitespace only")
+    return v
+```
+
+---
+
+### Bug 6 — UI Telemetry Badge: Intent Router Misidentified as Redis Cache *(Low)*
+
+**Failure:** The sidebar badge logic used `retrieval_ms == 0 AND generation_ms == 0` to detect cache hits. This is also true for greeting/date intent bypass results, so typing `"hello"` showed a green **"⚡ CACHE HIT (REDIS)"** badge — factually wrong and misleading to a recruiter.
+
+**Fix:** Added `cache_hit: bool` field to `QueryResponse` (passed from `PipelineResult`). Badge logic now has three explicit states:
+
+| Condition | Badge |
+|---|---|
+| `cache_hit=True` | 🟢 `⚡ CACHE HIT (REDIS)` |
+| `cache_hit=False`, latency=0ms | 🟡 `⚡ INTENT ROUTER BYPASS (0ms)` |
+| `cache_hit=False`, latency>0ms | 🔵 `🔵 LIVE PIPELINE GENERATION` |
+
+---
+
+### Infrastructure Resilience (by design, not a bug)
+
+These failure modes are handled gracefully without crashing:
+
+| Failure | Behaviour |
+|---|---|
+| **Redis unreachable** | `_get_redis()` returns `None` within 1s timeout; pipeline continues without cache |
+| **Pinecone down / API key invalid** | Outer `except (PineconeException, …, Exception)` triggers Resilient Demo Fallback Mode |
+| **Groq rate limit / API error** | Same outer except — demo fallback serves pre-baked answer with realistic simulated latency |
+| **`static_demo.json` missing / corrupt** | `_load_demo_data()` catches the `IOError`, sets `_DEMO_DATA = {}`, returns default guidance message |
+| **Unknown query in demo mode** | Returns a professional default with a hint toward known working queries |
