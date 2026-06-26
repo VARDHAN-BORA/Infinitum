@@ -6,7 +6,7 @@ from openai import OpenAI
 
 from app.config import settings
 
-MODEL = "meta/llama-3.2-3b-instruct"
+MODEL = "meta/llama-3.1-8b-instruct"
 
 _client = None
 
@@ -52,7 +52,7 @@ def generate_answer(query: str, contexts: list[str]) -> str:
             {"role": "user", "content": user_message},
         ],
         temperature=0.2,
-        max_tokens=256,
+        max_tokens=384,
     )
 
     return response.choices[0].message.content.strip()

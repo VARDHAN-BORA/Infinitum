@@ -200,9 +200,14 @@ async def run_rag_pipeline(
         # ── 0a. Acknowledgment / greeting / filler bypass ────────────────────
         _query_words_list = re.findall(r"\b[a-z0-9]+\b", clean_query)
         _query_words_set = set(_query_words_list)
-        _clean_text = " ".join(_query_words_list)
+        _first_word = _query_words_list[0] if _query_words_list else ""
 
-        if _clean_text in _ACK_TOKENS:
+        _is_ack = (
+            _first_word in _ACK_TOKENS
+            or len(_query_words_list) <= 2 and _query_words_set & _ACK_TOKENS
+        )
+
+        if _is_ack:
             logger.info("Ack/greeting bypass triggered for %r", clean_query)
             return PipelineResult(
                 answer=(

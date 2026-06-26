@@ -547,7 +547,7 @@ st.markdown(
                 <div class="hero-subtitle">
                     Pinecone
                     <span class="hero-dot dot-pinecone"></span>
-                    Llama 3.2 3B
+                    Llama 3.1 8B
                     <span class="hero-dot dot-nvidia"></span>
                     Llama 3
                     <span class="hero-dot dot-llama"></span>
