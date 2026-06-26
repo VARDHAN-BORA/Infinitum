@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +21,15 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = ""
+
+    @field_validator(
+        "PINECONE_API_KEY", "PINECONE_INDEX_NAME",
+        "NVIDIA_API_KEY", "REDIS_HOST", "REDIS_PASSWORD",
+        mode="before",
+    )
+    @classmethod
+    def _strip_whitespace(cls, v: str) -> str:
+        return v.strip()
 
 
 
