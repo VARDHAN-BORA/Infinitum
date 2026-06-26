@@ -1,5 +1,5 @@
 """
-Infinitum AI — Recruiter-facing chat interface.
+Infinitum AI — Premium studio-grade chat interface.
 
 Run with:
     streamlit run app/ui.py
@@ -24,109 +24,363 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Global styles ─────────────────────────────────────────────────────────────
+# ── Premium Design System ─────────────────────────────────────────────────────
 st.markdown(
     """
     <style>
-        /* ---- typography ---- */
-        html, body, [class*="css"] { font-family: "Inter", sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-        /* ---- header ---- */
-        .infinitum-header {
-            display: flex; align-items: center; gap: 12px;
-            padding: 0.4rem 0 1.2rem 0; border-bottom: 1px solid #e2e8f0;
-            margin-bottom: 1.2rem;
+        :root {
+            --brand-primary: #6C5CE7;
+            --brand-primary-light: #A29BFE;
+            --brand-accent: #00CEC9;
+            --brand-accent-2: #FD79A8;
+            --surface-0: #0A0A0F;
+            --surface-1: #12121A;
+            --surface-2: #1A1A26;
+            --surface-3: #22222E;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-medium: rgba(255,255,255,0.1);
+            --text-primary: #F0F0F5;
+            --text-secondary: #9494A8;
+            --text-tertiary: #5E5E72;
+            --glow-brand: 0 0 30px rgba(108,92,231,0.3);
+            --glow-accent: 0 0 20px rgba(0,206,201,0.2);
         }
-        .infinitum-logo {
-            font-size: 2.4rem; font-weight: 800;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+
+        html, body, [class*="css"] {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--surface-0) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .stApp {
+            background: var(--surface-0) !important;
+        }
+
+        .stApp > header { background-color: transparent !important; }
+        .stApp > footer { display: none !important; }
+        #MainMenu, footer, header { visibility: hidden; }
+
+        /* ---- Sidebar glass ---- */
+        section[data-testid="stSidebar"] {
+            background: var(--surface-1) !important;
+            border-right: 1px solid var(--border-subtle) !important;
+        }
+        section[data-testid="stSidebar"] > div {
+            background: transparent !important;
+        }
+
+        /* ---- Scrollbar ---- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+        /* ---- Hero ---- */
+        .hero-container {
+            position: relative;
+            padding: 2.5rem 0 1.5rem;
+            overflow: hidden;
+        }
+        .hero-container::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(108,92,231,0.15), transparent),
+                        radial-gradient(ellipse 40% 40% at 80% 20%, rgba(0,206,201,0.08), transparent);
+            pointer-events: none;
+        }
+        .hero-inner {
+            position: relative;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .hero-logo {
+            font-size: 2.8rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(108,92,231,0.4));
+            line-height: 1;
         }
-        .infinitum-title { font-size: 1.35rem; font-weight: 700; color: #1e293b; }
-        .infinitum-subtitle { font-size: 0.82rem; color: #64748b; }
-
-        /* ---- cache badges ---- */
-        .badge {
+        .hero-title {
+            font-size: 1.5rem; font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .hero-badge {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 8px 16px; border-radius: 999px;
-            font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em;
-            text-transform: uppercase; width: 100%;
-            justify-content: center; margin: 0.5rem 0 1rem 0;
+            background: rgba(108,92,231,0.12);
+            border: 1px solid rgba(108,92,231,0.25);
+            color: var(--brand-primary-light);
+            border-radius: 999px; padding: 3px 12px;
+            font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-left: 10px;
         }
-        .badge-cache {
-            background: #dcfce7; color: #15803d;
-            border: 1.5px solid #86efac;
+        .hero-subtitle {
+            font-size: 0.88rem; color: var(--text-secondary);
+            margin-top: 4px; font-weight: 400;
         }
-        .badge-live {
-            background: #dbeafe; color: #1d4ed8;
-            border: 1.5px solid #93c5fd;
+        .hero-dot {
+            display: inline-block; width: 6px; height: 6px;
+            border-radius: 50%; margin: 0 8px;
+            vertical-align: middle;
         }
-        .badge-intent {
-            background: #fef9c3; color: #854d0e;
-            border: 1.5px solid #fde047;
+        .dot-pinecone { background: #00CEC9; box-shadow: 0 0 6px rgba(0,206,201,0.5); }
+        .dot-llama { background: #6C5CE7; box-shadow: 0 0 6px rgba(108,92,231,0.5); }
+        .dot-redis { background: #FD79A8; box-shadow: 0 0 6px rgba(253,121,168,0.5); }
+        .dot-nvidia { background: #76B900; box-shadow: 0 0 6px rgba(118,185,0,0.5); }
+
+        /* ---- Welcome state ---- */
+        .welcome-container {
+            text-align: center;
+            padding: 4rem 1rem 2rem;
+        }
+        .welcome-icon {
+            width: 80px; height: 80px;
+            margin: 0 auto 1.5rem;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(108,92,231,0.15), rgba(0,206,201,0.1));
+            border: 1px solid var(--border-medium);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem;
+            box-shadow: var(--glow-brand);
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .welcome-heading {
+            font-size: 1.3rem; font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .welcome-desc {
+            font-size: 0.92rem; color: var(--text-secondary);
+            line-height: 1.6; max-width: 480px; margin: 0 auto;
         }
 
-        /* ---- metric cards ---- */
-        .metric-row { display: flex; gap: 8px; margin-bottom: 0.8rem; }
-        .metric-card {
-            flex: 1; background: #f8fafc; border: 1px solid #e2e8f0;
-            border-radius: 10px; padding: 10px 12px; text-align: center;
+        /* ---- Test cards ---- */
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 2rem 0 0.8rem;
         }
-        .metric-label {
-            font-size: 0.68rem; color: #94a3b8;
-            text-transform: uppercase; letter-spacing: 0.06em;
+        .test-card {
+            background: var(--surface-1);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 1.1rem 1rem;
+            transition: all 0.25s ease;
+            cursor: pointer;
         }
-        .metric-value {
-            font-size: 1.15rem; font-weight: 700; color: #0f172a;
-            margin-top: 2px;
+        .test-card:hover {
+            border-color: rgba(108,92,231,0.3);
+            background: var(--surface-2);
+            box-shadow: 0 4px 20px rgba(108,92,231,0.1);
+            transform: translateY(-1px);
+        }
+        .test-card-number {
+            font-size: 0.65rem; font-weight: 700;
+            color: var(--brand-primary-light);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .test-card-icon {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        .test-card-title {
+            font-size: 0.82rem; font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+        .tip-text {
+            font-size: 0.75rem; color: var(--text-tertiary);
+            line-height: 1.5;
+            text-align: center;
+            margin-top: 0.25rem;
+        }
+        .tip-highlight { color: var(--brand-primary-light); font-weight: 600; }
+
+        /* ---- Answer box ---- */
+        .answer-box {
+            background: var(--surface-1);
+            border: 1px solid var(--border-subtle);
+            border-left: 3px solid var(--brand-primary);
+            border-radius: 0 14px 14px 0;
+            padding: 1.2rem 1.4rem;
+            line-height: 1.75; color: var(--text-primary);
+            font-size: 0.95rem;
         }
 
-        /* ---- source chips ---- */
-        .source-chip {
-            display: inline-block; background: #f1f5f9;
-            border: 1px solid #e2e8f0; color: #475569;
-            border-radius: 6px; padding: 2px 10px;
-            font-size: 0.75rem; margin: 2px 4px 2px 0;
-        }
-
-        /* ---- citation markers ---- */
+        /* ---- Cite markers ---- */
         .cite {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 18px; height: 18px; background: #6366f1; color: white;
-            border-radius: 50%; font-size: 0.65rem; font-weight: 700;
-            vertical-align: super; margin: 0 1px;
+            min-width: 20px; height: 20px; padding: 0 5px;
+            background: linear-gradient(135deg, var(--brand-primary), #8B5CF6);
+            color: white; border-radius: 10px;
+            font-size: 0.65rem; font-weight: 700;
+            vertical-align: super; margin: 0 2px;
+            box-shadow: 0 2px 8px rgba(108,92,231,0.3);
         }
 
-        /* ---- answer box ---- */
-        .answer-box {
-            background: #fafafa; border-left: 3px solid #6366f1;
-            border-radius: 0 10px 10px 0; padding: 1rem 1.2rem;
-            line-height: 1.7; color: #1e293b;
+        /* ---- Source chips ---- */
+        .source-chip {
+            display: inline-block;
+            background: rgba(108,92,231,0.1);
+            border: 1px solid rgba(108,92,231,0.2);
+            color: var(--brand-primary-light);
+            border-radius: 8px; padding: 3px 10px;
+            font-size: 0.72rem; font-weight: 500;
+            margin: 2px 4px 2px 0;
         }
 
-        /* ---- RAG verification tour ---- */
-        .tour-panel {
-            background: linear-gradient(135deg, #f5f3ff, #eff6ff);
-            border: 1.5px solid #c4b5fd;
-            border-radius: 14px;
-            padding: 1rem 1.25rem 0.85rem;
-            margin: 1.2rem 0 0.6rem;
+        /* ---- Sidebar: Brand ---- */
+        .sidebar-brand {
+            padding: 0.5rem 0 0;
         }
-        .tour-header {
-            font-size: 0.88rem; font-weight: 700;
-            color: #4338ca; margin-bottom: 0.75rem;
+        .sidebar-logo {
+            font-size: 1.8rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1;
         }
-        .tour-tip {
-            font-size: 0.76rem; color: #6366f1;
-            margin-top: 0.65rem; font-style: italic;
-            line-height: 1.5;
+        .sidebar-tagline {
+            font-size: 0.72rem; color: var(--text-tertiary);
+            letter-spacing: 0.05em; text-transform: uppercase;
+            font-weight: 600; margin-top: 4px;
         }
 
-        /* ---- chat input override ---- */
-        .stChatInputContainer { padding-top: 0.5rem; }
+        /* ---- Sidebar: Telemetry ---- */
+        .badge {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 16px; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            width: 100%; margin: 0 0 1rem;
+        }
+        .badge-cache {
+            background: rgba(0,206,201,0.1);
+            color: #00CEC9;
+            border: 1px solid rgba(0,206,201,0.25);
+        }
+        .badge-live {
+            background: rgba(108,92,231,0.1);
+            color: var(--brand-primary-light);
+            border: 1px solid rgba(108,92,231,0.25);
+        }
+        .badge-intent {
+            background: rgba(253,121,168,0.1);
+            color: #FD79A8;
+            border: 1px solid rgba(253,121,168,0.25);
+        }
+        .badge-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        .badge-cache .badge-dot { background: #00CEC9; box-shadow: 0 0 8px rgba(0,206,201,0.6); }
+        .badge-live .badge-dot { background: var(--brand-primary-light); box-shadow: 0 0 8px rgba(108,92,231,0.6); }
+        .badge-intent .badge-dot { background: #FD79A8; box-shadow: 0 0 8px rgba(253,121,168,0.6); }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
 
-        /* ---- hide Streamlit branding ---- */
-        #MainMenu, footer, header { visibility: hidden; }
+        .metric-row { display: flex; gap: 8px; margin-bottom: 0.6rem; }
+        .metric-card {
+            flex: 1;
+            background: var(--surface-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px; padding: 12px 10px; text-align: center;
+        }
+        .metric-label {
+            font-size: 0.62rem; color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 1.2rem; font-weight: 800;
+            color: var(--text-primary);
+            margin-top: 4px;
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        /* ---- Sidebar: Clear button ---- */
+        .sidebar-clear button {
+            background: var(--surface-2) !important;
+            border: 1px solid var(--border-medium) !important;
+            color: var(--text-secondary) !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            font-size: 0.82rem !important;
+            transition: all 0.2s ease !important;
+        }
+        .sidebar-clear button:hover {
+            border-color: rgba(253,121,168,0.4) !important;
+            color: #FD79A8 !important;
+            background: rgba(253,121,168,0.08) !important;
+        }
+
+        /* ---- Chat input ---- */
+        .stChatInputContainer {
+            padding-top: 0.5rem;
+        }
+        .stChatInputContainer > div {
+            border-radius: 16px !important;
+            border: 1px solid var(--border-medium) !important;
+            background: var(--surface-1) !important;
+        }
+
+        /* ---- Chat messages ---- */
+        [data-testid="stChatMessage"] {
+            background: transparent !important;
+            border: none !important;
+            padding: 0.5rem 0 !important;
+        }
+        [data-testid="stChatMessageAvatar-Assistant"] {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent)) !important;
+        }
+
+        /* ---- Expander ---- */
+        .streamlit-expanderHeader {
+            font-size: 0.82rem !important;
+            font-weight: 600 !important;
+            color: var(--text-secondary) !important;
+            background: var(--surface-1) !important;
+            border: 1px solid var(--border-subtle) !important;
+            border-radius: 12px !important;
+        }
+
+        /* ---- Slider ---- */
+        .stSlider label {
+            font-size: 0.82rem !important;
+            font-weight: 600 !important;
+            color: var(--text-secondary) !important;
+        }
+
+        /* ---- Section divider ---- */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-medium), transparent);
+            margin: 1rem 0;
+        }
+
+        /* ---- Status bar (bottom of sidebar) ---- */
+        .status-bar {
+            display: flex; align-items: center; gap: 8px;
+            padding: 0.75rem 0; margin-top: 0.5rem;
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #00CEC9;
+            box-shadow: 0 0 8px rgba(0,206,201,0.5);
+        }
+        .status-text {
+            font-size: 0.72rem; color: var(--text-tertiary);
+            font-weight: 500;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -136,7 +390,6 @@ st.markdown(
 # ── Helper functions ──────────────────────────────────────────────────────────
 
 def _format_citations(text: str) -> str:
-    """Wrap [N] markers with a styled span."""
     return re.sub(
         r"\[(\d+)\]",
         r'<span class="cite">\1</span>',
@@ -168,31 +421,23 @@ def _query_api(query: str, top_k: int) -> dict | None:
 
 
 def _render_telemetry(latency: dict[str, float], cache_hit: bool) -> None:
-    """
-    Render the developer telemetry panel in the sidebar.
-
-    Three distinct states:
-      cache_hit=True           → green  CACHE HIT (REDIS)
-      cache_hit=False, 0ms     → yellow INTENT ROUTER BYPASS
-      cache_hit=False, non-0ms → blue   LIVE PIPELINE GENERATION
-    """
     retrieval = latency.get("retrieval_ms", 0.0)
     generation = latency.get("generation_ms", 0.0)
     is_zero_latency = (retrieval == 0.0 and generation == 0.0)
 
     if cache_hit:
         st.sidebar.markdown(
-            '<div class="badge badge-cache">⚡ Cache Hit (Redis)</div>',
+            '<div class="badge badge-cache"><span class="badge-dot"></span>Cache Hit (Redis)</div>',
             unsafe_allow_html=True,
         )
     elif is_zero_latency:
         st.sidebar.markdown(
-            '<div class="badge badge-intent">⚡ Intent Router Bypass (0ms)</div>',
+            '<div class="badge badge-intent"><span class="badge-dot"></span>Intent Router Bypass</div>',
             unsafe_allow_html=True,
         )
     else:
         st.sidebar.markdown(
-            '<div class="badge badge-live">🔵 Live Pipeline Generation</div>',
+            '<div class="badge badge-live"><span class="badge-dot"></span>Live Pipeline Generation</div>',
             unsafe_allow_html=True,
         )
 
@@ -205,15 +450,15 @@ def _render_telemetry(latency: dict[str, float], cache_hit: bool) -> None:
         <div class="metric-row">
             <div class="metric-card">
                 <div class="metric-label">Retrieval</div>
-                <div class="metric-value">{retrieval:.0f} ms</div>
+                <div class="metric-value">{retrieval:.0f}<span style="font-size:0.6rem;color:var(--text-tertiary)">ms</span></div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Generation</div>
-                <div class="metric-value">{generation:.0f} ms</div>
+                <div class="metric-value">{generation:.0f}<span style="font-size:0.6rem;color:var(--text-tertiary)">ms</span></div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Total</div>
-                <div class="metric-value">{total:.0f} ms</div>
+                <div class="metric-value">{total:.0f}<span style="font-size:0.6rem;color:var(--text-tertiary)">ms</span></div>
             </div>
         </div>
         """,
@@ -223,13 +468,11 @@ def _render_telemetry(latency: dict[str, float], cache_hit: bool) -> None:
 
 # ── Session state ─────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
-    st.session_state.messages = []  # [{role, content, data}]
+    st.session_state.messages = []
 
 if "last_telemetry" not in st.session_state:
     st.session_state.last_telemetry = None
 
-# Holds a query string pre-filled by a suggestion button click.
-# Consumed once per run so it never fires twice.
 if "pending_query" not in st.session_state:
     st.session_state.pending_query = None
 
@@ -237,24 +480,25 @@ if "pending_query" not in st.session_state:
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown(
-        '<div style="font-size:1.6rem;font-weight:800;'
-        'background:linear-gradient(135deg,#6366f1,#8b5cf6);'
-        '-webkit-background-clip:text;-webkit-text-fill-color:transparent;">'
-        "∞ Infinitum AI</div>",
+        """
+        <div class="sidebar-brand">
+            <div class="sidebar-logo">∞ Infinitum</div>
+            <div class="sidebar-tagline">Enterprise RAG Platform</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-    st.caption("Enterprise RAG Platform")
-    st.divider()
+
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
     top_k = st.slider(
         "Chunks to retrieve (top_k)",
         min_value=1, max_value=20, value=DEFAULT_TOP_K,
-        help="How many context chunks to pull from Pinecone per query.",
     )
 
-    st.divider()
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-    with st.expander("🛠 Developer Telemetry & Analytics", expanded=True):
+    with st.expander("Developer Telemetry", expanded=True):
         if st.session_state.last_telemetry:
             data = st.session_state.last_telemetry
             _render_telemetry(
@@ -264,24 +508,49 @@ with st.sidebar:
             match_count = data.get("match_count", 0)
             st.caption(f"Context chunks used: **{match_count}**")
         else:
-            st.info("Telemetry will appear here after your first query.", icon="📊")
+            st.info("Telemetry will appear after your first query.", icon="📊")
 
-    st.divider()
-    if st.button("🗑 Clear conversation", use_container_width=True):
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="sidebar-clear">', unsafe_allow_html=True)
+    if st.button("Clear conversation", use_container_width=True):
         st.session_state.messages = []
         st.session_state.last_telemetry = None
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="status-bar">
+            <div class="status-dot"></div>
+            <div class="status-text">Systems operational</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
-# ── Main header ───────────────────────────────────────────────────────────────
+# ── Hero header ───────────────────────────────────────────────────────────────
 st.markdown(
     """
-    <div class="infinitum-header">
-        <div class="infinitum-logo">∞</div>
-        <div>
-            <div class="infinitum-title">Infinitum AI</div>
-            <div class="infinitum-subtitle">
-                Ask anything — powered by Pinecone · llama-text-embed-v2 · Llama 3 · Redis
+    <div class="hero-container">
+        <div class="hero-inner">
+            <div class="hero-logo">∞</div>
+            <div>
+                <div style="display:flex;align-items:center;">
+                    <span class="hero-title">Infinitum AI</span>
+                    <span class="hero-badge">● Live</span>
+                </div>
+                <div class="hero-subtitle">
+                    Pinecone
+                    <span class="hero-dot dot-pinecone"></span>
+                    Nemotron Nano
+                    <span class="hero-dot dot-nvidia"></span>
+                    Llama 3
+                    <span class="hero-dot dot-llama"></span>
+                    Redis
+                    <span class="hero-dot dot-redis"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -289,17 +558,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Welcome message ───────────────────────────────────────────────────────────
+# ── Welcome state ─────────────────────────────────────────────────────────────
 if not st.session_state.messages:
     st.markdown(
         """
-        <div style="text-align:center;padding:3rem 1rem;color:#94a3b8;">
-            <div style="font-size:3rem;margin-bottom:0.5rem;">∞</div>
-            <div style="font-size:1.1rem;font-weight:600;color:#64748b;">
-                Your enterprise knowledge assistant is ready.
-            </div>
-            <div style="font-size:0.9rem;margin-top:0.5rem;">
-                Ask a question about your ingested documents below.
+        <div class="welcome-container">
+            <div class="welcome-icon">∞</div>
+            <div class="welcome-heading">Your enterprise knowledge assistant is ready</div>
+            <div class="welcome-desc">
+                Ask questions about your ingested documents, or try the recommended queries below to see the RAG pipeline in action.
             </div>
         </div>
         """,
@@ -312,17 +579,15 @@ for msg in st.session_state.messages:
         if msg["role"] == "user":
             st.markdown(msg["content"])
         else:
-            # Render answer with styled citation markers
             formatted = _format_citations(msg["content"])
             st.markdown(
                 f'<div class="answer-box">{formatted}</div>',
                 unsafe_allow_html=True,
             )
-            # Expandable sources section
             data = msg.get("data", {})
             matches = data.get("matches", [])
             if matches:
-                with st.expander(f"📄 View {len(matches)} source chunk(s)"):
+                with st.expander(f"View {len(matches)} source chunk(s)"):
                     for i, match in enumerate(matches, 1):
                         score = match.get("score", 0)
                         source = match.get("source", "unknown")
@@ -333,64 +598,55 @@ for msg in st.session_state.messages:
                             f" · score: `{score:.4f}`",
                             unsafe_allow_html=True,
                         )
-                        st.caption(text[:400] + ("…" if len(text) > 400 else ""))
+                        st.caption(text[:400] + ("..." if len(text) > 400 else ""))
                         if i < len(matches):
                             st.divider()
 
-# ── RAG Verification Tour ────────────────────────────────────────────────────
+# ── Test cards ────────────────────────────────────────────────────────────────
 _SUGGESTED = [
-    (
-        "📋 Test 1: Infrastructure Compliance updates",
-        "give me a summary of the 2026 infrastructure standard compliance updates.",
-    ),
-    (
-        "🗄️ Test 2: Core Storage & Indexing Policy",
-        "knowledge_base_manifest",
-    ),
-    (
-        "🚀 Test 3: Continuous Deployment Runbook",
-        "what are the 2026 updates for routing and logging protocols?",
-    ),
+    ("TEST 01", "📋", "Infrastructure compliance updates", "give me a summary of the 2026 infrastructure standard compliance updates."),
+    ("TEST 02", "🗄️", "Core storage & indexing policy", "knowledge_base_manifest"),
+    ("TEST 03", "🚀", "Continuous deployment runbook", "what are the 2026 updates for routing and logging protocols?"),
 ]
 
-st.markdown(
-    '<div class="tour-panel">'
-    '<div class="tour-header">💡 Test the RAG Pipeline (Recommended Queries)</div>'
-    "</div>",
-    unsafe_allow_html=True,
-)
+if not st.session_state.messages:
+    _cols = st.columns(3)
+    for _col, (_num, _icon, _title, _query) in zip(_cols, _SUGGESTED):
+        with _col:
+            if st.button(
+                f"{_icon}  {_title}",
+                use_container_width=True,
+                key=f"tour_{_query[:20]}",
+            ):
+                st.session_state.pending_query = _query
+                st.rerun()
 
-_tour_cols = st.columns(3)
-for _col, (_label, _query) in zip(_tour_cols, _SUGGESTED):
-    with _col:
-        if st.button(_label, use_container_width=True, key=f"tour_{_query[:20]}"):
-            st.session_state.pending_query = _query
-            st.rerun()
-
-st.caption(
-    "👉 **Tip:** Click a query to see **Live RAG Retrieval** (Blue Badge). "
-    "Click it a **second time** to see the **~2ms Semantic Cache Hit** (Green Badge)!"
-)
+    st.markdown(
+        '<div class="tip-text">'
+        '<span class="tip-highlight">Tip:</span> Click once for '
+        '<span style="color:#6C5CE7">Live RAG</span>, click again for '
+        '<span style="color:#00CEC9">~2ms Cache Hit</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
 # ── Chat input ────────────────────────────────────────────────────────────────
-_chat_input = st.chat_input("Ask Infinitum anything about your knowledge base…")
+_chat_input = st.chat_input("Ask Infinitum anything about your knowledge base...")
 
-# Merge: a pending_query (from button click) takes priority over typed input.
-# pending_query is consumed immediately so it never fires a second time.
 _pending = st.session_state.pending_query
 if _pending:
     st.session_state.pending_query = None
-prompt = _pending or _chat_input
+    prompt = _pending or _chat_input
+else:
+    prompt = _chat_input
 
 if prompt:
-    # Record and display user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Call API
     with st.chat_message("assistant"):
-        with st.spinner("Searching knowledge base and generating answer…"):
+        with st.spinner("Searching knowledge base..."):
             result = _query_api(prompt, top_k=top_k)
 
         if result:
@@ -403,7 +659,7 @@ if prompt:
 
             matches = result.get("matches", [])
             if matches:
-                with st.expander(f"📄 View {len(matches)} source chunk(s)"):
+                with st.expander(f"View {len(matches)} source chunk(s)"):
                     for i, match in enumerate(matches, 1):
                         score = match.get("score", 0)
                         source = match.get("source", "unknown")
@@ -414,11 +670,10 @@ if prompt:
                             f" · score: `{score:.4f}`",
                             unsafe_allow_html=True,
                         )
-                        st.caption(text[:400] + ("…" if len(text) > 400 else ""))
+                        st.caption(text[:400] + ("..." if len(text) > 400 else ""))
                         if i < len(matches):
                             st.divider()
 
-            # Persist message and telemetry
             st.session_state.messages.append(
                 {"role": "assistant", "content": answer, "data": result}
             )

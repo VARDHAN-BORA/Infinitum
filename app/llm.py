@@ -5,7 +5,7 @@ from openai import OpenAI
 
 from app.config import settings
 
-MODEL = "meta/llama-3.1-8b-instruct"
+MODEL = "nvidia/llama-3.1-nemotron-nano-8b-v1"
 
 _client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",

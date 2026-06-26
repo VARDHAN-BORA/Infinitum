@@ -87,7 +87,7 @@ Pinecone retrieval and NVIDIA generation entirely.
 ║                     ▼                                            ║
 ║   ┌─────────────────────────────────────────┐                    ║
 ║   │    NVIDIA LLM GENERATION (~390 ms)      │                    ║
-║   │  meta/llama-3.1-8b-instruct             │                    ║
+║   │  nvidia/llama-3.1-nemotron-nano-8b-v1  │                    ║
 ║   │  3-mode system prompt:                  │                    ║
 ║   │  • Greetings & Casual Chat              │                    ║
 ║   │  • System Data Overview                 │                    ║
@@ -116,7 +116,7 @@ Pinecone retrieval and NVIDIA generation entirely.
 |---|---|
 | **API Server** | FastAPI 0.115 + Uvicorn (async, production-grade) |
 | **Vector Database** | Pinecone 6.0 — integrated inference (`llama-text-embed-v2`) |
-| **LLM Generation** | NVIDIA API — `meta/llama-3.1-8b-instruct` |
+| **LLM Generation** | NVIDIA API — `nvidia/llama-3.1-nemotron-nano-8b-v1` |
 | **Semantic Cache** | Redis (Upstash) — SHA-256 keyed, 1-hour TTL, TLS/SSL |
 | **Text Splitting** | LangChain `RecursiveCharacterTextSplitter` |
 | **Data Validation** | Pydantic v2 + Pydantic Settings |
