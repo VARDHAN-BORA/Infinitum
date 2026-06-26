@@ -402,7 +402,7 @@ def _query_api(query: str, top_k: int) -> dict | None:
         resp = requests.post(
             f"{API_BASE}/v1/query",
             json={"query": query, "top_k": top_k},
-            timeout=60,
+            timeout=120,
         )
         resp.raise_for_status()
         return resp.json()
@@ -544,7 +544,7 @@ st.markdown(
                 <div class="hero-subtitle">
                     Pinecone
                     <span class="hero-dot dot-pinecone"></span>
-                    Nemotron Nano
+                    DeepSeek V4 Flash
                     <span class="hero-dot dot-nvidia"></span>
                     Llama 3
                     <span class="hero-dot dot-llama"></span>

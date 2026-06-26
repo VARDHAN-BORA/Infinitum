@@ -5,7 +5,7 @@ from openai import OpenAI
 
 from app.config import settings
 
-MODEL = "nvidia/llama-3.1-nemotron-nano-8b-v1"
+MODEL = "deepseek-ai/deepseek-v4-flash"
 
 _client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
