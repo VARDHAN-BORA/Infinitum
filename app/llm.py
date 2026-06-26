@@ -6,7 +6,7 @@ from openai import OpenAI
 
 from app.config import settings
 
-MODEL = "deepseek-ai/deepseek-v4-flash"
+MODEL = "meta/llama-3.2-3b-instruct"
 
 _client = None
 

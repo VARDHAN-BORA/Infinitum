@@ -547,7 +547,7 @@ st.markdown(
                 <div class="hero-subtitle">
                     Pinecone
                     <span class="hero-dot dot-pinecone"></span>
-                    DeepSeek V4 Flash
+                    Llama 3.2 3B
                     <span class="hero-dot dot-nvidia"></span>
                     Llama 3
                     <span class="hero-dot dot-llama"></span>
