@@ -402,10 +402,13 @@ def _query_api(query: str, top_k: int) -> dict | None:
         resp = requests.post(
             f"{API_BASE}/v1/query",
             json={"query": query, "top_k": top_k},
-            timeout=120,
+            timeout=30,
         )
         resp.raise_for_status()
         return resp.json()
+    except requests.exceptions.Timeout:
+        st.error("The API timed out after 30 seconds. The server may be overloaded — please try again.")
+        return None
     except requests.exceptions.ConnectionError:
         st.error(
             "Cannot connect to the Infinitum API. "

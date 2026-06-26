@@ -1,7 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from app.models import DocumentIngest, IngestResponse, QueryRequest, QueryResponse
-from app.ingestion import ingest_document
-from app.query import run_rag_pipeline
 
 app = FastAPI(
     title="Infinitum",
@@ -17,12 +15,10 @@ async def health_check():
 
 @app.post("/v1/query", response_model=QueryResponse, tags=["RAG"])
 async def query(payload: QueryRequest):
+    from app.query import run_rag_pipeline
     try:
         result = await run_rag_pipeline(payload.query, top_k=payload.top_k)
     except Exception as exc:
-        # run_rag_pipeline catches all infrastructure errors internally and
-        # returns a demo fallback — this guard exists only for truly
-        # unexpected exceptions that somehow escape that layer.
         raise HTTPException(status_code=500, detail=f"Unrecoverable pipeline error: {exc}")
     return QueryResponse(
         query=payload.query,
@@ -37,6 +33,7 @@ async def query(payload: QueryRequest):
 
 @app.post("/v1/ingest", response_model=IngestResponse, tags=["Ingestion"])
 async def ingest(payload: DocumentIngest):
+    from app.ingestion import ingest_document
     try:
         record = await ingest_document(payload)
     except Exception as exc:

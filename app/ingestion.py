@@ -4,7 +4,7 @@ from functools import partial
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.models import DocumentIngest, DocumentRecord
-from app.pinecone_client import index as _index, EMBED_TEXT_FIELD, PINECONE_NAMESPACE
+from app.pinecone_client import EMBED_TEXT_FIELD, PINECONE_NAMESPACE, get_index
 
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
@@ -59,9 +59,10 @@ async def _pinecone_upsert(
     """
     records = _build_records(document_id, chunks, source)
     loop = asyncio.get_event_loop()
+    index = get_index()
     await loop.run_in_executor(
         None,
-        partial(_index.upsert_records, PINECONE_NAMESPACE, records),
+        partial(index.upsert_records, PINECONE_NAMESPACE, records),
     )
 
 
