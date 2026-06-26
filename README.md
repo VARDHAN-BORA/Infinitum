@@ -14,7 +14,7 @@ and a polished Streamlit frontend with live developer telemetry.
 ┌─────────────────────────────────────────────────────────────────────┐
 │                   LATENCY BENCHMARK RESULTS                         │
 ├─────────────────────────┬───────────────────────────────────────────┤
-│  Live Pipeline (first)  │  ~~1,176 ms  (Pinecone + Groq LLM)        │
+│  Live Pipeline (first)  │  ~~1,176 ms  (Pinecone + NVIDIA LLM)       │
 │  Redis Cache Hit        │    ~186 ms  (SHA-256 key lookup)          │
 │  Latency Reduction      │   84.2%  ████████████████████████░░░░     │
 │  Intent Bypass          │    ~0 ms    (Greetings/date queries)      │
@@ -25,7 +25,7 @@ and a polished Streamlit frontend with live developer telemetry.
 > Local benchmarks show **99.8% latency reduction** (1,058ms → 2ms) with dedicated Redis.
 
 After the first query, identical questions are served from Redis cache — skipping
-Pinecone retrieval and Groq generation entirely.
+Pinecone retrieval and NVIDIA generation entirely.
 
 ---
 
@@ -86,8 +86,8 @@ Pinecone retrieval and Groq generation entirely.
 ║   └─────────────────┬───────────────────────┘                    ║
 ║                     ▼                                            ║
 ║   ┌─────────────────────────────────────────┐                    ║
-║   │    GROQ LLM GENERATION (~390 ms)        │                    ║
-║   │  llama-3.1-8b-instant (free tier)       │                    ║
+║   │    NVIDIA LLM GENERATION (~390 ms)      │                    ║
+║   │  meta/llama-3.1-8b-instruct             │                    ║
 ║   │  3-mode system prompt:                  │                    ║
 ║   │  • Greetings & Casual Chat              │                    ║
 ║   │  • System Data Overview                 │                    ║
@@ -116,7 +116,7 @@ Pinecone retrieval and Groq generation entirely.
 |---|---|
 | **API Server** | FastAPI 0.115 + Uvicorn (async, production-grade) |
 | **Vector Database** | Pinecone 6.0 — integrated inference (`llama-text-embed-v2`) |
-| **LLM Generation** | Groq API — `llama-3.1-8b-instant` (100% free tier) |
+| **LLM Generation** | NVIDIA API — `meta/llama-3.1-8b-instruct` |
 | **Semantic Cache** | Redis (Upstash) — SHA-256 keyed, 1-hour TTL, TLS/SSL |
 | **Text Splitting** | LangChain `RecursiveCharacterTextSplitter` |
 | **Data Validation** | Pydantic v2 + Pydantic Settings |
@@ -198,7 +198,7 @@ Copy `.env.example` to `.env` and fill in your keys:
 ```bash
 PINECONE_API_KEY=your_key_here
 PINECONE_INDEX_NAME=llama-text-embed-v2-index
-GROQ_API_KEY=your_key_here
+NVIDIA_API_KEY=your_key_here
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=           # required for Upstash in production
@@ -226,7 +226,7 @@ infinitum/
 │   ├── main.py              # FastAPI routes (/health, /v1/query, /v1/ingest)
 │   ├── query.py             # RAG pipeline — intent router, cache, retrieval, eval
 │   ├── ingestion.py         # Document chunking + Pinecone upsert
-│   ├── llm.py               # Groq client + 3-mode system prompt
+│   ├── llm.py               # NVIDIA client + 3-mode system prompt
 │   ├── models.py            # Pydantic schemas (request/response/internal)
 │   ├── config.py            # Pydantic Settings (reads .env)
 │   ├── pinecone_client.py   # Shared Pinecone client (initialized once)
@@ -273,5 +273,5 @@ infinitum/
 |---|---|
 | **Redis unreachable** | Falls back to live pipeline within 1s timeout |
 | **Pinecone down** | Serves pre-baked demo answers from `static_demo.json` |
-| **Groq rate limit** | Same demo fallback with simulated realistic latency |
+| **NVIDIA rate limit** | Same demo fallback with simulated realistic latency |
 | **`static_demo.json` missing** | Returns default guidance message gracefully |

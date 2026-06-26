@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     PINECONE_API_KEY: str
     PINECONE_INDEX_NAME: str
-    GROQ_API_KEY: str
+    NVIDIA_API_KEY: str
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = ""

@@ -1,16 +1,16 @@
 import asyncio
 from functools import partial
 
-from groq import Groq
+from openai import OpenAI
 
 from app.config import settings
 
-# llama3-8b-8192 was retired by Groq. llama-3.1-8b-instant is its direct
-# successor — same 8B parameter Llama 3 family, free tier, and faster.
-MODEL = "llama-3.1-8b-instant"
+MODEL = "meta/llama-3.1-8b-instruct"
 
-# Groq client is thread-safe and designed to be shared — create it once.
-_client = Groq(api_key=settings.GROQ_API_KEY)
+_client = OpenAI(
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key=settings.NVIDIA_API_KEY,
+)
 
 _SYSTEM_PROMPT = """You are Infinitum AI, an advanced Enterprise RAG platform assistant. \
 You have access to retrieved system document context chunks.
@@ -35,7 +35,7 @@ answer this question." smoothly."""
 
 def generate_answer(query: str, contexts: list[str]) -> str:
     """
-    Synchronous generation call — kept sync because Groq's SDK is synchronous.
+    Synchronous generation call — kept sync because the OpenAI SDK is synchronous.
     Call generate_answer_async() from async code so the event loop stays free.
 
     The user message always reaches the model regardless of whether context
@@ -72,7 +72,7 @@ async def generate_answer_async(query: str, contexts: list[str]) -> str:
     """
     Async wrapper around generate_answer().
 
-    Offloads the blocking Groq network call to a thread-pool executor so the
+    Offloads the blocking NVIDIA network call to a thread-pool executor so the
     FastAPI event loop remains free to handle other requests in parallel.
     """
     loop = asyncio.get_event_loop()

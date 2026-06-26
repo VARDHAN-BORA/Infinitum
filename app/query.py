@@ -189,7 +189,7 @@ async def run_rag_pipeline(
 
     Normal flow:
       Cache hit  → answer returned in <5 ms, latency breakdown zeros.
-      Cache miss → Pinecone search → Groq generation → Redis write → eval.
+      Cache miss → Pinecone search → NVIDIA generation → Redis write → eval.
       Redis down → graceful fallback, live pipeline runs as normal.
 
     Fallback mode (any infrastructure exception):

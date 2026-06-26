@@ -9,7 +9,7 @@ services:
         sync: false
       - key: PINECONE_INDEX_NAME
         sync: false
-      - key: GROQ_API_KEY
+      - key: NVIDIA_API_KEY
         sync: false
       - key: REDIS_HOST
         sync: false
